@@ -53,8 +53,24 @@ bool Display::loginScreen()
 
 void Display::menu()
 {
+	int selection;
 	cout << "login successful\n\n\n" << endl;
-	cout << "Welcome to our Fabulous Program !" << endl;
+	cout << "Welcome to our Fabulous Program !" << endl << endl << "1. Check my current Planning" << endl << "2. Browse Available Course" << endl << "3. Logout" << endl;
+	cout << "selection: " << endl;
+	cin >> selection;
+
+	switch (selection)
+	{
+	case 1:
+		cout << "You choose Planning" << endl;
+		break;
+	case 2:
+		cout << "You chose Course choice" << endl;
+		break;
+	case 3:
+		cout << "You logged out" << endl;
+		break;
+	}
 }
 
 void Display::clearScreen()
