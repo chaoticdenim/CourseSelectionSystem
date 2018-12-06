@@ -1,6 +1,7 @@
 #pragma once
 
 #include"Cours.h"
+#include "Eleve.h"
 #include <vector>
 
 
@@ -11,6 +12,6 @@ class listeCours
 public:
 	listeCours();
 	vector<Cours> availableCourses;
-	void displayAvailableCourses();
+	void displayAvailableCourses(Eleve* e);
 };
 

@@ -153,7 +153,7 @@ void Display::registerToCourse(Eleve* e)
 	int regNumber;
 	string yesNo;
 	listeCours lc; //Create an object to store all available courses as described in cours.txt
-	lc.displayAvailableCourses();
+	lc.displayAvailableCourses(e);
 
 	cout << "\n\nTo register for a class, simply enter the corresponding number" << endl;
 	cin >> regNumber;

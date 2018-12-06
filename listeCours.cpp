@@ -18,12 +18,22 @@ listeCours::listeCours() // Creates the list of courses from cours.txt
 	}
 }
 
-void listeCours::displayAvailableCourses()
+void listeCours::displayAvailableCourses(Eleve* e)
 {
 	int i = 0;
+	bool taken = false;
 	for (vector<Cours>::iterator it = availableCourses.begin(); it != availableCourses.end(); it++)
 	{
-		cout << i+1 << ". Course: " << it->getNomCours() << endl << "Classroom: " << it->getLocation() << endl << "Professor: " << it->getProf() << endl << endl;
+
+		for (int i = 0; i < 4; i++)
+		{
+			if (it->getNomCours() == e->getPlanning()[i].getNomCours())
+				taken = true;
+		}
+		if (!taken)
+			cout << i + 1 << ". Course: " << it->getNomCours() << endl << "Classroom: " << it->getLocation() << endl << "Professor: " << it->getProf() << endl << endl;
+		else
+			taken = false;
 		i++;
 	}
 }

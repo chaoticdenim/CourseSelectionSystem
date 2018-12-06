@@ -3,4 +3,4 @@ Physics Haskell SAM Math
 coolgirl
 NULL
 guigeek12
-R Haskell CS401 
+R Haskell SAM VHDL 
