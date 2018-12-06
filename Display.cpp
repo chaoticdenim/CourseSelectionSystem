@@ -1,19 +1,41 @@
 #include "Display.h"
+#include "listeCours.h"
 using namespace std;
 
-bool Display::loginScreen()
+
+void Display::session()
 {
+	cout << "*******LOGIN SCREEN***********" << endl;
+
+	Eleve* currentUser = this->loginScreen();
+
+	if (currentUser->getId() != "NULL") //If login sucessful
+	{
+		this->clearScreen();
+		cout << "login successful\n" << "*****Welcome " << currentUser->getPrenom() << " " << currentUser->getNom() << "*****" << endl;
+		this->menu(currentUser);
+	}
+	else
+	{
+		cout << "failed login" << endl;
+		this->session();
+	}
+}
+
+Eleve* Display::loginScreen()
+{
+
+	Eleve* ep = new Eleve();
 	string login;
 	string password;
-	string flogin, fpassword;
-	bool result = false;
-	map<string, string> users;
+	string flogin, fpassword, fname, fsurname;
+	bool loginSuccess = false;
 
-	while (!result)
+	while (!loginSuccess)
 	{
 		cout << "Login: " << endl;
 		cin >> login;
-		this->login = login;
+		
 		cout << "Password: " << endl;
 		cin >> password;
 
@@ -24,136 +46,171 @@ bool Display::loginScreen()
 			cout << "error opening file" << endl;
 		}
 
-		while (infile >> flogin >> fpassword)
+		while (infile >> flogin >> fpassword >> fname >> fsurname)
 		{
-			users.insert(pair<string, string>(flogin, fpassword));
-		}
-
-		if (users.find(this->login) != users.end())
-		{
-			if (users.find(this->login)->second == password)
+			if (login == flogin && fpassword == password)
 			{
-				result = true;
-				return result;
-			}
-			else
-			{
-				cout << "wrong password" << endl;
-				return result;
+				ep->setId(login);
+				ep->setMdp(password);
+				ep->setNom(fsurname);
+				ep->setPrenom(fname);
+				ep->setPlanningFromFile();
+				loginSuccess = true;
+				break;
 			}
 		}
-		else
-		{
-			cout << "user not found" << endl;
-			return result;
-		}
 
-		return result;
-	}	
+		if (!loginSuccess)
+		{
+			cout << "failed login. please try again" << endl;
+		}
+	}
+
+	return ep;
 }
 
-void Display::menu()
+int Display::menu(Eleve* e)
 {
+	
 	int selection;
-	cout << "login successful\n\n\n" << endl;
-	cout << "Welcome to our Fabulous Program !" << endl << endl << "1. Check my current Planning" << endl << "2. Browse Available Course" << endl << "3. Logout" << endl;
+	cout << endl << endl << "1. Check my current Planning" << endl << "2. Register for a course" << endl << "3. Unregister from a Course" << endl << "4. Logout" << endl << "5. Logout and Quit" << endl;
 	cout << "selection: " << endl;
 	cin >> selection;
+	this->clearScreen();
+	
 
 	switch (selection)
 	{
-	case 1:
-		cout << "You choose Planning" << endl;
-		planningScreen();
-		break;
-	case 2:
-		cout << "You chose Course choice" << endl;
-		break;
-	case 3:
-		cout << "You logged out" << endl;
-		break;
+		case 1:
+			this->planningScreen(e);
+			this->menu(e);
+			break;
+		case 2:
+			this->registerToCourse(e);
+			this->menu(e);
+			break;
+		case 3:
+			this->unregisterFromCourse(e);
+			this->menu(e);
+			break;
+		case 4:
+			this->logout(e);
+			this->session();
+			break;
+		case 5:
+			this->logout(e);
+
+			cout << " ____                   ____             _" << endl;
+			cout << "| __ ) _   _  ___      | __ ) _   _  ___| |" << endl;
+			cout << "|  _ \\| | | |/ _ \\_____| _  \\| | | |/ _ \\ |" << endl;
+			cout << "| |_) | |_| |  __/_____| |_) | |_| |  __/_|" << endl;
+			cout << "|____ /\\__, |\\___|     |____ /\\__, |\\___(_)" << endl;
+			cout << "        |___/                  |___/" << endl;
+
+			cout << "Have a nice day!" << endl;
+			break;
 	}
+	
+
+	return selection;
 }
 
-void Display::planningScreen()
+void Display::planningScreen(Eleve* e)
 {
-	fstream infile("planning.txt"); //line impaire = login. Ligne paire = vecteur. 1er élément : nbre de cours suivis. le reste : indique si le cours i est suivi ou non
-	map<string, vector<int>> loginToPlanning;
-	vector<int> coursesFollowed;
-	vector<string> courseNames = { "Math", "Physics", "VHDL", "Another Useless One", "Haskell Programming", "SAM" };
-	string line;
-	string login;
-	bool isLineEven = false;
-	int isFollowed;
-	string s_isFollowed;
+	listeCours lc;
+	int index;
+	vector<string> courseNames; //vector similar to lc.availableCourses but only contains the names of the courses.
 
-	if (infile.fail())
+	for (unsigned int i = 0; i < lc.availableCourses.size(); i++)
 	{
-		cout << "error opening file" << endl;
+		courseNames.push_back(lc.availableCourses[i].getNomCours());
+	}
+
+	if (e->isPlanningEmpty())
+	{
+		cout << "You haven't registered for any courses yet. " << endl;
 	}
 	else
 	{
-		while (getline(infile, line)) //Lecture des données sauvegardées dans planning.txt et restitution dans la map.
+		cout << "You are enrolled in :" << endl;
+
+		for (int i = 0; i < 4; i++)
 		{
-			if (isLineEven)
+			if (e->getPlanning()[i].getNomCours() != "NULL")
 			{
-				stringstream linestream(line);
-				while (getline(linestream, s_isFollowed, ' '))
-				{
-					coursesFollowed.push_back(stoi(s_isFollowed));
-				}
-
-				loginToPlanning.insert(make_pair(login, coursesFollowed));
-				coursesFollowed.clear();
-				isLineEven = false;
+				vector<string>::iterator it = find(courseNames.begin(), courseNames.end(), e->getPlanning()[i].getNomCours());
+				index = it - courseNames.begin();
+				cout << endl << i + 1 << ". Course name: " << lc.availableCourses[index].getNomCours() << endl << "Location: "
+					<< lc.availableCourses[index].getLocation() << endl << "Professor: " << lc.availableCourses[index].getProf() << endl;
 			}
-			else
-			{
-				login = line;
-				isLineEven = true;
-			}
-		}
-
-		infile.close();
-
-		cout << "current login : " << this->login << endl;
-
-		map<string, vector<int>>::iterator found = loginToPlanning.find(this->login);
-
-		if (found == loginToPlanning.end())
-		{
-			cout << "No courses taken. Planning created. You can now enroll in courses" << endl;
- 			fstream outfile("planning.txt", fstream::app | fstream::out);
-			if (outfile.fail())
-			{
-				cout << "error creating file" << endl;
-			}
-			else
-			{
-				outfile << endl << this->login << endl;
-				for (int i = 0; i < 7; i++)
-				{
-					outfile << "0 ";
-				}
-			}
-
-			outfile.close();
-		}
-		else //Display enrolled courses
-		{
-			cout << "You are enrolled in " << *found->second.begin() << " courses" << endl;
-			int i = 0;
-			for (auto it = found->second.begin() + 1; it != found->second.end(); it++)
-			{
-				if (*it == 1)
-				{
-					cout << courseNames[i] << ";";
-				}
-				i++;
-			}
-			cout << endl;
+				
 		}
 	}
+}
+
+void Display::registerToCourse(Eleve* e)
+{
+	int regNumber;
+	string yesNo;
+	listeCours lc; //Create an object to store all available courses as described in cours.txt
+	lc.displayAvailableCourses();
+
+	cout << "\n\nTo register for a class, simply enter the corresponding number" << endl;
+	cin >> regNumber;
+
+	switch (e->AddCours(lc.availableCourses[regNumber-1]))
+	{
+	case 0:
+		cout << "Registration successful." << endl << lc.availableCourses[regNumber-1].getNomCours() << " added to your planning" << endl;
+		break;
+	case 1:
+		cout << "You already registered to " << lc.availableCourses[regNumber-1].getNomCours() << ". Please try another one" << endl;
+		break;
+	case 2:
+		cout << "You are registered to the maximum number of courses (4). Please delete a course first" << endl;
+		cout << "Do you want to delete a course ?" << endl << "[y/n]";
+		cin >> yesNo;
+		if (yesNo == "y")
+		{
+			this->unregisterFromCourse(e);
+			if (e->AddCours(lc.availableCourses[regNumber - 1]) == 0)
+			{
+				cout << "Registration successful." << endl << lc.availableCourses[regNumber - 1].getNomCours() << " added to your planning" << endl;
+			}
+			else
+			{
+				cout << "failed to add course" << endl;
+			}
+		}
+
+	}
+	
+}
+
+void Display::logout(Eleve* e)
+{
+	e->savePlanning();
+	cout << "You logged out" << endl;
+}
+
+void Display::unregisterFromCourse(Eleve* e)
+{
+	int delNumber;
+
+	cout << "Which one ?" << endl;
+	for (int i = 0; i < 4; i++)
+	{
+		if(e->getPlanning()[i].getNomCours() != "NULL")
+			cout << i + 1 << ". " << e->getPlanning()[i].getNomCours() << endl;
+	}
+	cin >> delNumber;
+
+	if (e->RmCours(e->getPlanning()[delNumber - 1].getNomCours()))//delete selected course from planning
+		cout << "course successfully deleted" << endl;
+	else
+	{
+		cout << "you are not registered to this course" << endl;
+	}	
 }
 
 void Display::clearScreen()

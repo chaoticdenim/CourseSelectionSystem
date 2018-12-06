@@ -5,17 +5,22 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include "Cours.h"
+#include "Eleve.h"
 using namespace std;
 
 class Display
 {
 public:
-	bool loginScreen();
-	void menu();
-	void planningScreen();
+	void session();
+	Eleve* loginScreen();
+	int menu(Eleve* e);
+	void planningScreen(Eleve* e);
+	void registerToCourse(Eleve* e);
+	void unregisterFromCourse(Eleve* e);
+	void logout(Eleve* e);
 	void clearScreen();
 private:
 	string login;
-	vector<int> courseVector = { 0, 0, 0, 0, 0, 0, 0 };
 };
 
