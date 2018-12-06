@@ -27,6 +27,7 @@ public:
 	void setNom(string nom) { m_nom = nom; };
 	void setPlanningFromFile();
 	void savePlanning();
+	void setPlanningEmpty(bool emptyness) { m_planningEmpty = emptyness; };
 
     int AddCours(Cours newCours);
     bool RmCours(string nomCours);

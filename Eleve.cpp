@@ -89,9 +89,13 @@ int Eleve::AddCours(Cours newCours)
     {
         if(m_planning[i].getNomCours()=="NULL")
         {
-
+			if (this->isPlanningEmpty())
+			{
+				this->setPlanningEmpty(false);
+			}
 			m_planning[i] = Cours(newCours.getNomCours(), newCours.getProf(), newCours.getLocation());
             ajout=1;
+			this->savePlanning();
 			return 0;
         }
     }
@@ -102,6 +106,7 @@ bool Eleve::RmCours(string nomCours)
 {
     Cours libre; //on crée un cours sans initialiser les données membres
     int indice=0;
+	int remaining = 0;
 	bool found = false;
     for(int i=0;i<4;i++)
     {
@@ -115,11 +120,18 @@ bool Eleve::RmCours(string nomCours)
 
     for(int j=indice;j<4;j++)
     {
-        if (m_planning[j].getNomCours() != "NULL"){
+        if (m_planning[j].getNomCours() != "NULL")
+		{
+			remaining++;
             m_planning[j-1] = m_planning[j];
             m_planning[j] = libre;
         }
     }
+
+	if (remaining == 0)
+	{
+		this->setPlanningEmpty(true);
+	}
 
 	return found;
 }
@@ -129,6 +141,7 @@ void Eleve::savePlanning()
 	fstream infile("planning.txt");
 	ofstream outfile("newplanning.txt");
 	string line, course, newPlanning, old;
+	bool planningExists = false;
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -155,9 +168,15 @@ void Eleve::savePlanning()
 
 		if (line == this->getId())
 		{
+			planningExists = true;
 			getline(infile, old); 
 			outfile << newPlanning; // replace old with newPlanning
 		}
+	}
+
+	if (!planningExists)
+	{
+		outfile << this->getId() << endl << "NULL" << endl;
 	}
 
 	infile.close();
